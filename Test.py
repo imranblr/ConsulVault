@@ -150,16 +150,22 @@ for datacenter in config:
                 keys.append(re.findall(regexp1, line))
             if "Root Token" in line:
                 rtoken = re.findall(regexp2, line)
-
+    num = 0
     for n in nodes:
         node = n['node_client']
+
+        # node.ExecCommand("sudo sed -i '/bind_addr/a bind_addr = \"127.0.0.1\"' /etc/consul.d/consul.hcl", True)
+        # node.ExecCommand("sudo sed -i '/GetInterfaceIP/d' /etc/consul.d/consul.hcl", True)
         # if n['Server'] == 'consul':
-            # node.ExecCommand("sudo sed -i 's/http:/https:/' /etc/consul.d/connect_config_file.hcl")
-            # node.ExecCommand("sudo sed -i 's/8200/8201/' /etc/consul.d/connect_config_file.hcl")
+
             # node.ExecCommand("sudo systemctl restart consul", True)
 
-        if n['Server'] == 'vault':
-            # node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_cert.pem" %(tls_cert, n['hostname']), True)
+        # if n['Server'] == 'vault':
+
+            # tls_cert = "dc1-client-consul-" + str(num) + ".pem"
+            # tls_key = "dc1-client-consul-" + str(num) + "-key.pem"
+            # num += 1
+            # node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_cert.pem" % (tls_cert, n['hostname']), True)
             # node.ExecCommand("sudo cat /etc/consul.d/consul-agent-ca.pem >> /etc/vault.d/%s_cert.pem" % n['hostname'], True)
             # node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_key.pem" % (tls_key, n['hostname']),
             #                  True)
@@ -170,17 +176,25 @@ for datacenter in config:
             # node.ExecCommand(
             #     "sudo sed -i '/tls_disable/d' /etc/vault.d/vault.hcl", True)
 
-            node.ExecCommand("sudo systemctl restart vault", True)
-
-            print("Unsealing Vault node: %s..." % n['hostname'])
-            time.sleep(5)
-            node.ExecCommand(
-                "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[1][0], True)
-            node.ExecCommand(
-                "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[2][0], True)
-            node.ExecCommand(
-                "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[3][0], True)
+            # node.ExecCommand("sudo systemctl restart vault", True)
+            #
+            # print("Unsealing Vault node: %s..." % n['hostname'])
+            # time.sleep(3)
+            # # node.ExecCommand(
+            # #     "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[1][0], True)
+            # # node.ExecCommand(
+            # #     "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[2][0], True)
+            # # node.ExecCommand(
+            # #     "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[3][0], True)
+            # node.ExecCommand(
+            #     "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[1][0]), True)
+            # node.ExecCommand(
+            #     "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[2][0]), True)
+            # node.ExecCommand(
+            #     "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[3][0]), True)
         node.ExecCommand("sudo systemctl restart consul", True)
+        print("Restarted consul service on node -> ", n['hostname'])
+
 
     # for n in nodes:
     #     node = n['node_client']

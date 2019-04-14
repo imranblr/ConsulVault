@@ -29,6 +29,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.define "consul01" do |consul01|
     consul01.vm.hostname = "consul01"
     # Forward Consul web and api port 8501
+    consul01.vm.network "forwarded_port", guest: 8500, host: 8510
     consul01.vm.network "forwarded_port", guest: 8501, host: 8511
       # consul01.ssh.username = "root"
       # consul01.ssh.password = "P@ssw0rd"

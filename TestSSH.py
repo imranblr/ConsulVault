@@ -15,7 +15,7 @@ except:
 
 Vault_Helper_SSH_Config_File = """
 cat << EOM |sudo tee /etc/vault-ssh-helper.d/config.hcl
-vault_addr = "http://@@@VAULT-IP@@@:8200"
+vault_addr = "https://@@@VAULT-IP@@@:8200"
 ssh_mount_point = "ssh"
 ca_cert = "/etc/vault-ssh-helper.d/vault.crt"
 tls_skip_verify = false
@@ -59,7 +59,7 @@ for datacenter in config:
                 print("Checking Vault Status on %s -> " % n['hostname'], end='')
                 file_name = n['hostname'] + ".status"
                 time.sleep(2)
-                node.ExecCommand("vault status -address=\"http://127.0.0.1:8200\" | sudo tee %s" % file_name)
+                node.ExecCommand("vault status -ca-cert=/etc/vault.d/%s_cert.pem | sudo tee %s" % (n['hostname'], file_name))
                 node.GetFile(file_name, os.getcwd() + "/%s" % file_name)
                 with open(file_name, 'r') as the_file:
                     status_str = the_file.read()
@@ -67,22 +67,25 @@ for datacenter in config:
                         print("Active \n")
                         print("Enabling SSH Secret Engine on %s...\n" % n['hostname'])
                         active_vault_ip = n['ip_address']
-                        node.ExecCommand("vault login -address=\"http://127.0.0.1:8200\" %s" % rtoken[0])
-                        node.ExecCommand("vault secrets enable -address=\"http://127.0.0.1:8200\" ssh")
+                        node.ExecCommand("vault login -ca-cert=/etc/vault.d/%s_cert.pem %s" % (n['hostname'], rtoken[0]))
+                        node.ExecCommand("vault secrets enable -ca-cert=/etc/vault.d/%s_cert.pem ssh" % n['hostname'])
                         print("Creating an OTP Key Role...\n")
                         time.sleep(2)
                         node.ExecCommand(
-                            "vault write -address=\"http://127.0.0.1:8200\" ssh/roles/otp_key_role key_type=otp default_user=ubuntu cidr_list=0.0.0.0/0 address=127.0.0.1:8500")
+                            "vault write -ca-cert=/etc/vault.d/%s_cert.pem ssh/roles/otp_key_role key_type=otp "
+                            "default_user=ubuntu cidr_list=0.0.0.0/0 address=127.0.0.1:8500" % n['hostname'])
                         print("Generating first OTP...\n")
                         time.sleep(2)
                         ssh_keys = node.ExecCommand(
-                            "vault write -address=\"http://127.0.0.1:8200\" ssh/creds/otp_key_role ip=%s | awk 'FNR == 7 {print $2}'" % ssh_server_ip)
+                            "vault write -ca-cert=/etc/vault.d/%s_cert.pem ssh/creds/otp_key_role ip=%s | "
+                            "awk 'FNR == 7 {print $2}'" % (n['hostname'], ssh_server_ip))
                         print("Please execute -> \"ssh ubuntu@%s\" and supply the OTP key -> %s" % (
                         ssh_server_ip, ''.join(ssh_keys['out'])))
                         ssh_engine_enable = True
                         break
                     else:
                         print("Standby \n")
+
     helper_ver = "0.1.4"
     for n in compnodes:
         node = n['node_client']
@@ -100,11 +103,12 @@ for datacenter in config:
         node.ExecCommand("sudo mv vault.crt /etc/vault-ssh-helper.d/", True)
         vault_ssh_config = str(Vault_Helper_SSH_Config_File)
         vault_ssh_config = vault_ssh_config.replace("@@@VAULT-IP@@@", active_vault_ip)
+        # vault_ssh_config = vault_ssh_config.replace("@@@VAULT-IP@@@", "172.20.20.16")
         node.ExecCommand("sudo %s" % vault_ssh_config, True)
         node.ExecCommand(
             "sudo sed -i '/^@include common-auth/a auth optional pam_unix.so not_set_pass use_first_pass nodelay' /etc/pam.d/sshd")
         node.ExecCommand(
-            "sudo sed -i '/^@include common-auth/a auth requisite pam_exec.so quiet expose_authtok log=/tmp/vaultssh.log /usr/local/bin/vault-ssh-helper -dev -config=/etc/vault-ssh-helper.d/config.hcl' /etc/pam.d/sshd")
+            "sudo sed -i '/^@include common-auth/a auth requisite pam_exec.so quiet expose_authtok log=/tmp/vaultssh.log /usr/local/bin/vault-ssh-helper -config=/etc/vault-ssh-helper.d/config.hcl' /etc/pam.d/sshd")
         node.ExecCommand("sudo sed -i '/^@include common-auth/s/^/#/g' /etc/pam.d/sshd")
         node.ExecCommand(
             "sudo sed -i 's/^#\?ChallengeResponse.*/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config")
