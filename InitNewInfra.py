@@ -17,7 +17,7 @@ connect {
     enabled = true
     ca_provider = "vault"
     ca_config {
-        address = "http://localhost:8200"
+        address = "http://vault.service.consul:8200"
         token = "@@@VAULT-TOKEN@@@"
         root_pki_path = "pki"
         intermediate_pki_path = "pki_int"
@@ -646,7 +646,7 @@ for datacenter in config:
                     #                  "consul/config/access address=127.0.0.1:8500 token=%s" % master_token)
                     # time.sleep(2)
 
-                    print("Creating a policy and token for PKI Secret Engine...")
+                    print("Creating a policy and token for PKI Secret Engine...\n")
                     node.ExecCommand("sudo %s" % str(PKI_Policy_File), True)
                     node.ExecCommand("vault policy write -address=\"http://127.0.0.1:8200\" "
                                      "pki_policy pki_policy_file.hcl", True)
@@ -656,46 +656,46 @@ for datacenter in config:
                     # print("PKI Token -> ", pki_token[0])
                     time.sleep(2)
 
-                    # print("Enabling PKI Secret Engine on %s..." % n['hostname'])
-                    # node.ExecCommand("vault secrets enable -address=\"http://127.0.0.1:8200\" pki")
-                    # node.ExecCommand("vault secrets tune -address=\"http://127.0.0.1:8200\" "
-                    #                  "-max-lease-ttl=219000h pki")
-                    # print("Generating PKI Root Certificate...\n")
-                    # time.sleep(2)
-                    # node.ExecCommand("vault write -address=\"http://127.0.0.1:8200\" "
-                    #                  "-field=certificate pki/root/generate/internal common_name=\"consul\" "
-                    #                  "ttl=219000h > Root_CA_cert.crt")
-                    # node.ExecCommand(
-                    #     "vault write -address=\"http://127.0.0.1:8200\" pki/config/urls "
-                    #     "issuing_certificates=\"http://127.0.0.1:8200/v1/pki/ca\" "
-                    #     "crl_distribution_points=\"http://127.0.0.1:8200/v1/pki/crl\"")
-                    # time.sleep(1)
-    #                 print("Enabling Intermediate PKI Secret Engine on %s..." % n['hostname'])
-    #                 node.ExecCommand("vault secrets enable -address=\"http://127.0.0.1:8200\" -path=pki_int pki")
-    #                 node.ExecCommand(
-    #                     "vault secrets tune -address=\"http://127.0.0.1:8200\" -max-lease-ttl=175200h pki_int")
-    #
-    #                 print("Generating Intermediate Root Certificate...\n")
-    #                 node.ExecCommand(
-    #                     "vault write -address=\"http://127.0.0.1:8200\" -format=json "
-    #                     "pki_int/intermediate/generate/internal common_name=\"Consul Intermediate Authority\" "
-    #                     "ttl=\"175200h\" | jq -r '.data.csr' > pki_intermediate.csr")
-    #                 node.ExecCommand(
-    #                     "vault write -address=\"http://127.0.0.1:8200\" -format=json "
-    #                     "pki/root/sign-intermediate csr=@pki_intermediate.csr format=pem_bundle "
-    #                     "ttl=\"175200h\" | jq -r '.data.certificate' > intermediate.cert.pem")
-    #                 node.ExecCommand(
-    #                     "vault write -address=\"http://127.0.0.1:8200\" "
-    #                     "pki_int/intermediate/set-signed certificate=@intermediate.cert.pem")
-    #                 time.sleep(2)
-    #
-    #                 print("Creating PKI roles named \"consul-role\" and \"leaf-cert\" for PKI_INT path...\n")
-    #                 node.ExecCommand("vault write -address=\"http://127.0.0.1:8200\" "
-    #                                  "pki_int/roles/consul-role allow_subdomain=true allowed_domains=\"consul\" "
-    #                                  "key_type=ec key_bits=224 require_cn=false use_csr_sans=false ttl=1h max_ttl=8760h")
-    #                 node.ExecCommand("vault write  -address=\"http://127.0.0.1:8200\" "
-    #                                  "pki_int/roles/leaf-cert allow_subdomain=true allowed_domains=consul "
-    #                                  "key_type=ec key_bits=224 require_cn=false use_csr_sans=false ttl=1h max_ttl=1h")
+                    print("Enabling PKI Secret Engine on %s..." % n['hostname'])
+                    node.ExecCommand("vault secrets enable -address=\"http://127.0.0.1:8200\" pki")
+                    node.ExecCommand("vault secrets tune -address=\"http://127.0.0.1:8200\" "
+                                     "-max-lease-ttl=219000h pki")
+                    print("Generating PKI Root Certificate...\n")
+                    time.sleep(2)
+                    node.ExecCommand("vault write -address=\"http://127.0.0.1:8200\" "
+                                     "-field=certificate pki/root/generate/internal common_name=\"consul\" "
+                                     "ttl=219000h > Root_CA_cert.crt")
+                    node.ExecCommand(
+                        "vault write -address=\"http://127.0.0.1:8200\" pki/config/urls "
+                        "issuing_certificates=\"http://127.0.0.1:8200/v1/pki/ca\" "
+                        "crl_distribution_points=\"http://127.0.0.1:8200/v1/pki/crl\"")
+                    time.sleep(1)
+                    print("Enabling Intermediate PKI Secret Engine on %s..." % n['hostname'])
+                    node.ExecCommand("vault secrets enable -address=\"http://127.0.0.1:8200\" -path=pki_int pki")
+                    node.ExecCommand(
+                        "vault secrets tune -address=\"http://127.0.0.1:8200\" -max-lease-ttl=175200h pki_int")
+
+                    print("Generating Intermediate Root Certificate...\n")
+                    node.ExecCommand(
+                        "vault write -address=\"http://127.0.0.1:8200\" -format=json "
+                        "pki_int/intermediate/generate/internal common_name=\"Consul Intermediate Authority\" "
+                        "ttl=\"175200h\" | jq -r '.data.csr' > pki_intermediate.csr")
+                    node.ExecCommand(
+                        "vault write -address=\"http://127.0.0.1:8200\" -format=json "
+                        "pki/root/sign-intermediate csr=@pki_intermediate.csr format=pem_bundle "
+                        "ttl=\"175200h\" | jq -r '.data.certificate' > intermediate.cert.pem")
+                    node.ExecCommand(
+                        "vault write -address=\"http://127.0.0.1:8200\" "
+                        "pki_int/intermediate/set-signed certificate=@intermediate.cert.pem")
+                    time.sleep(2)
+
+                    print("Creating PKI roles named \"consul-role\" and \"leaf-cert\" for PKI_INT path...\n")
+                    node.ExecCommand("vault write -address=\"http://127.0.0.1:8200\" "
+                                     "pki_int/roles/consul-role allow_subdomain=true allowed_domains=\"consul\" "
+                                     "key_type=ec key_bits=224 require_cn=false use_csr_sans=false ttl=1h max_ttl=8760h")
+                    node.ExecCommand("vault write  -address=\"http://127.0.0.1:8200\" "
+                                     "pki_int/roles/leaf-cert allow_subdomain=true allowed_domains=consul "
+                                     "key_type=ec key_bits=224 require_cn=false use_csr_sans=false ttl=1h max_ttl=1h")
                     time.sleep(2)
                     break
                 else:
@@ -725,72 +725,53 @@ for datacenter in config:
         node = n['node_client']
         connect_config = str(Connect_Consul_Config_File)
         if datacenter['pki_engine'] == 'vault':
-            if n['Server'] == 'vault':
+            if n['Server'] == 'consul':
                 connect_config = str(Connect_Config_File)
                 connect_config = connect_config.replace("@@@VAULT-TOKEN@@@", "%s" % pki_token[0])
         node.ExecCommand("sudo %s" % connect_config, True)
         print("Restarting consul service on Node: %s " % n['hostname'])
         node.ExecCommand("sudo systemctl restart consul.service", True)
 
-
+    num1 = 0
+    num2 = 0
     tls_created = None
     for n in nodes:
         node = n['node_client']
-        if n['Server'] == 'vault':
-            print("\nChecking Vault Status on %s -> " % n['hostname'], end='')
-            file_name = n['hostname'] + ".status"
-            with open(file_name, 'r') as the_file:
-                status_str = the_file.read()
-                if re.search("active", status_str):
-                    print("Active")
-                    if tls_created is not True:
-                        for num in range(totalConsulServers):
-                            if num == 0:
-                                node.ExecCommand("consul tls ca create")
-                                node.GetFile("consul-agent-ca.pem", tlsCerts + "/consul-agent-ca.pem")
-                                node.ExecCommand("consul tls cert create -server")
-                                tls_cert = primary_dc_name + "-server-consul-" + str(num) + ".pem"
-                                tls_key = primary_dc_name + "-server-consul-" + str(num) + "-key.pem"
-                                node.GetFile(tls_cert, tlsCerts + tls_cert)
-                                node.GetFile(tls_key, tlsCerts + tls_key)
-
-                            else:
-                                node.ExecCommand("consul tls cert create -server")
-                                tls_cert = primary_dc_name + "-server-consul-" + str(num) + ".pem"
-                                tls_key = primary_dc_name + "-server-consul-" + str(num) + "-key.pem"
-                                node.GetFile(tls_cert, tlsCerts + tls_cert)
-                                node.GetFile(tls_key, tlsCerts + tls_key)
-
-                        for num in range(totalVaultServers + totalNginxServers):
-                            node.ExecCommand("consul tls cert create -client")
-                            tls_cert = primary_dc_name + "-client-consul-" + str(num) + ".pem"
-                            tls_key = primary_dc_name + "-client-consul-" + str(num) + "-key.pem"
-                            node.GetFile(tls_cert, tlsCerts + tls_cert)
-                            node.GetFile(tls_key, tlsCerts + tls_key)
-                        print("Succesfully CREATED TLS Certs on node: %s \n" % n['hostname'])
-                        tls_created = True
-                        break
-                else:
-                    print("Standby")
-    num1 = 0
-    num2 = 0
-    for n in nodes:
-        node = n['node_client']
         tls_config_command = str(TLS_Config_File)
+        n['copied'] = None
         if n['Server'] == 'consul':
+            if tls_created is not True:
+                for num in range(totalConsulServers):
+                    if num == 0:
+                        node.ExecCommand("consul tls ca create")
+                        node.GetFile("consul-agent-ca.pem", tlsCerts + "/consul-agent-ca.pem")
+                        node.ExecCommand("consul tls cert create -server")
+                        node.ExecCommand("sudo cp *.pem /etc/consul.d/", True)
+                        n['copied'] = True
+                    else:
+                        node.ExecCommand("consul tls cert create -additional-dnsname vault.service.consul -server")
+                        tls_cert = primary_dc_name + "-server-consul-" + str(num) + ".pem"
+                        tls_key = primary_dc_name + "-server-consul-" + str(num) + "-key.pem"
+                        node.GetFile(tls_cert, tlsCerts + tls_cert)
+                        node.GetFile(tls_key, tlsCerts + tls_key)
+
+                for num in range(totalVaultServers + totalNginxServers):
+                    node.ExecCommand("consul tls cert create -client")
+                    tls_cert = primary_dc_name + "-client-consul-" + str(num) + ".pem"
+                    tls_key = primary_dc_name + "-client-consul-" + str(num) + "-key.pem"
+                    node.GetFile(tls_cert, tlsCerts + tls_cert)
+                    node.GetFile(tls_key, tlsCerts + tls_key)
+                print("Succesfully CREATED TLS Certs on node: %s " % n['hostname'])
+                tls_created = True
+
             tls_cert = primary_dc_name + "-server-consul-" + str(num1) + ".pem"
             tls_key = primary_dc_name + "-server-consul-" + str(num1) + "-key.pem"
-            num1 += 1
             tls_config_command = tls_config_command.replace("@@@TLS-CERT@@@", "%s" % tls_cert)
             tls_config_command = tls_config_command.replace("@@@TLS-KEY@@@", "%s" % tls_key)
-            node.ExecCommand("sudo %s" % tls_config_command, True)
-            node.SendFile(tlsCerts + "consul-agent-ca.pem", "consul-agent-ca.pem")
-            node.SendFile(tlsCerts + tls_cert, tls_cert)
-            node.SendFile(tlsCerts + tls_key, tls_key)
+            n['tls_config_command'] = tls_config_command
+            node.ExecCommand(n['tls_config_command'], True)
             node.ExecCommand("sudo sed -i 's/http/https/' /etc/consul.d/consul.hcl")
             node.ExecCommand("sudo sed -i 's/dns/https \= 8501, dns/' /etc/consul.d/consul.hcl")
-            node.ExecCommand("sudo mv *.pem /etc/consul.d/", True)
-            print("Succesfully Coppied TLS Certs to node: %s " % n['hostname'])
             if n['UI']:
                 node.ExecCommand("sudo sed -i 's/https = \"127.0.0.1\"/https = \"0.0.0.0\"/' /etc/consul.d/consul.hcl")
                 node.ExecCommand(
@@ -799,14 +780,26 @@ for datacenter in config:
                 node.ExecCommand("sudo sed -i '/verify_incoming/ s/true/false/' /etc/consul.d/tls_config_file.json", True)
                 node.ExecCommand("sudo sed -i '/verify_incoming/a \"verify_incoming_rpc\": true,' "
                                  "/etc/consul.d/tls_config_file.json", True)
-            node.ExecCommand("sudo systemctl restart consul.service", True)
+            if n['copied'] is True:
+                node.ExecCommand("sudo systemctl restart consul.service", True)
+                num1 += 1
+                continue
+            else:
+                node.SendFile(tlsCerts + "consul-agent-ca.pem", "consul-agent-ca.pem")
+                node.SendFile(tlsCerts + tls_cert, tls_cert)
+                node.SendFile(tlsCerts + tls_key, tls_key)
+                node.ExecCommand("sudo mv *.pem /etc/consul.d/", True)
+                node.ExecCommand("sudo systemctl restart consul.service", True)
+                print("Succesfully Coppied TLS Certs to node: %s " % n['hostname'])
+                n['copied'] = True
+                num1 += 1
         else:
             tls_cert = primary_dc_name + "-client-consul-" + str(num2) + ".pem"
             tls_key = primary_dc_name + "-client-consul-" + str(num2) + "-key.pem"
-            num2 += 1
             tls_config_command = tls_config_command.replace("@@@TLS-CERT@@@", "%s" % tls_cert)
             tls_config_command = tls_config_command.replace("@@@TLS-KEY@@@", "%s" % tls_key)
-            node.ExecCommand("sudo %s" % tls_config_command, True)
+            n['tls_config_command'] = tls_config_command
+            node.ExecCommand(n['tls_config_command'], True)
             node.ExecCommand("sudo sed -i 's/http/https/' /etc/consul.d/consul.hcl")
             node.ExecCommand("sudo sed -i 's/dns/https \= 8501, dns/' /etc/consul.d/consul.hcl")
             node.SendFile(tlsCerts + "consul-agent-ca.pem", "consul-agent-ca.pem")
@@ -815,17 +808,20 @@ for datacenter in config:
             node.ExecCommand("sudo mv *.pem /etc/consul.d/", True)
             node.ExecCommand("sudo systemctl restart consul.service", True)
             print("Succesfully Coppied TLS Certs to node: %s " % n['hostname'])
+            num2 += 1
             if n['Server'] == 'vault':
-                node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_cert.pem" %(tls_cert, n['hostname']), True)
-                node.ExecCommand("sudo cat /etc/consul.d/consul-agent-ca.pem >> /etc/vault.d/%s_cert.pem" % n['hostname'], True)
-                node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_key.pem" % (tls_key, n['hostname']),
-                                 True)
-                node.ExecCommand("sudo sed -i '/tls_disable/a tls_key_file = \"/etc/vault.d/%s_key.pem\"' "
-                                 "/etc/vault.d/vault.hcl" % n['hostname'], True)
-                node.ExecCommand("sudo sed -i '/tls_disable/a tls_cert_file = \"/etc/vault.d/%s_cert.pem\"' "
-                                 "/etc/vault.d/vault.hcl" % n['hostname'], True)
-                node.ExecCommand(
-                    "sudo sed -i '/tls_disable/d' /etc/vault.d/vault.hcl", True)
+            #     node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_cert.pem" % (tls_cert, n['hostname']),
+            #                      True)
+            #     node.ExecCommand(
+            #         "sudo cat /etc/consul.d/consul-agent-ca.pem >> /etc/vault.d/%s_cert.pem" % n['hostname'], True)
+            #     node.ExecCommand("sudo cat /etc/consul.d/%s > /etc/vault.d/%s_key.pem" % (tls_key, n['hostname']),
+            #                      True)
+            #     node.ExecCommand("sudo sed -i '/tls_disable/a tls_key_file = \"/etc/vault.d/%s_key.pem\"' "
+            #                      "/etc/vault.d/vault.hcl" % n['hostname'], True)
+            #     node.ExecCommand("sudo sed -i '/tls_disable/a tls_cert_file = \"/etc/vault.d/%s_cert.pem\"' "
+            #                      "/etc/vault.d/vault.hcl" % n['hostname'], True)
+            #     node.ExecCommand(
+            #         "sudo sed -i '/tls_disable/d' /etc/vault.d/vault.hcl", True)
                 node.ExecCommand("sudo sed -i 's/8500/8501/' /etc/vault.d/vault.hcl", True)
                 node.ExecCommand("sudo sed -i '/storage/a   scheme = \"https\"' /etc/vault.d/vault.hcl", True)
                 node.ExecCommand("sudo sed -i "
@@ -841,14 +837,22 @@ for datacenter in config:
                 print("Unsealing Vault node: %s..." % n['hostname'])
                 time.sleep(5)
                 node.ExecCommand(
-                    "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[1][0]),
-                    True)
+                    "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[1][0], True)
                 node.ExecCommand(
-                    "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[2][0]),
-                    True)
+                    "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[2][0], True)
                 node.ExecCommand(
-                    "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[3][0]),
-                    True)
+                    "vault operator unseal -address=\"http://127.0.0.1:8200\" %s" % keys[3][0], True)
+            #     node.ExecCommand(
+            #         "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[1][0]),
+            #         True)
+            #     node.ExecCommand(
+            #         "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[2][0]),
+            #         True)
+            #     node.ExecCommand(
+            #         "vault operator unseal -ca-cert=\"/etc/vault.d/%s_cert.pem\" %s" % (n['hostname'], keys[3][0]),
+            #         True)
+
+
 
 
 if UpDateConfigFileWhenFinished:
